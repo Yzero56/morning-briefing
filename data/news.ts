@@ -26,7 +26,9 @@ export async function getTodayNews(): Promise<News[]> {
   let internationalPick = internationalNews[0];
   try {
     const liveInternational = await fetchInternationalNews(3);
-    internationalPick = pickMostUrgent(liveInternational);
+    // 홈 카드는 (사회·날씨와 동일하게) 항상 국제 상세 페이지로 연결되어야 함.
+    // 기사 원문 링크는 /international 안에서만 쓰고, 홈에서는 라우트로 덮어씀.
+    internationalPick = { ...pickMostUrgent(liveInternational), link: "/international" };
   } catch (err) {
     console.error("[home] international live fetch failed, using fallback:", err);
   }
