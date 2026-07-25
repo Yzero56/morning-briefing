@@ -60,6 +60,29 @@ function isOngoing(headline: string): boolean {
   return ONGOING_PATTERNS.some((p) => p.test(headline));
 }
 
+// 네이버 뉴스 검색 API는 썸네일을 안 주기 때문에, 기사 원문 페이지의 og:image 메타태그를 대신 긁어옴
+async function fetchOgImage(articleUrl: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(articleUrl, {
+      signal: AbortSignal.timeout(3000),
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; MorningBriefBot/1.0)",
+      },
+    });
+    if (!res.ok) return undefined;
+
+    const html = await res.text();
+    const match =
+      html.match(/<meta[^>]+property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ??
+      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    if (!match) return undefined;
+
+    return new URL(match[1], articleUrl).toString();
+  } catch {
+    return undefined; // 스크래핑 실패 시 이미지 없이 진행 (치명적이지 않음)
+  }
+}
+
 // 네이버 뉴스 검색 API로 국제 뉴스를 가져와 공통 News 타입으로 변환
 export async function fetchInternationalNews(count = 3): Promise<News[]> {
   const clientId = process.env.NAVER_CLIENT_ID;
@@ -79,16 +102,25 @@ export async function fetchInternationalNews(count = 3): Promise<News[]> {
     sort: "sim",
   });
 
-  const res = await fetch(
-    `https://openapi.naver.com/v1/search/news.json?${params.toString()}`,
-    {
-      headers: {
-        "X-Naver-Client-Id": clientId,
-        "X-Naver-Client-Secret": clientSecret,
-      },
-      next: { revalidate: 600 }, // 10분마다 갱신
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://openapi.naver.com/v1/search/news.json?${params.toString()}`,
+      {
+        headers: {
+          "X-Naver-Client-Id": clientId,
+          "X-Naver-Client-Secret": clientSecret,
+        },
+        next: { revalidate: 600 }, // 10분마다 갱신
+        signal: AbortSignal.timeout(5000), // 5초 안에 응답 없으면 포기하고 폴백
+      }
+    );
+  } catch (err) {
+    if (err instanceof Error && err.name === "TimeoutError") {
+      throw new Error("네이버 뉴스 API 응답이 5초 내에 오지 않아 요청을 중단했습니다.");
     }
-  );
+    throw err;
+  }
 
   if (!res.ok) {
     throw new Error(`네이버 뉴스 API 요청 실패 (status ${res.status})`);
@@ -103,6 +135,8 @@ export async function fetchInternationalNews(count = 3): Promise<News[]> {
     )
     .slice(0, count);
 
+  const images = await Promise.all(filtered.map(({ link }) => fetchOgImage(link)));
+
   return filtered.map(({ item, link }, i) => ({
     id: 100 + i,
     category: "world",
@@ -111,6 +145,7 @@ export async function fetchInternationalNews(count = 3): Promise<News[]> {
     body: decodeEntities(item.description),
     source: sourceFromUrl(link),
     live: isOngoing(item.title),
+    image: images[i],
     link,
   }));
 }
