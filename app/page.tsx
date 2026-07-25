@@ -1,8 +1,8 @@
 // app/page.tsx
 import NewsCard from "@/components/NewsCard";
-import { todayNews } from "@/data/news";
+import { getTodayNews } from "@/data/news";
 
-export default function Home() {
+export default async function Home() {
   const now = new Date();
   const dateTag = now
     .toLocaleDateString("en-CA")   // 2026-07-19 형태
@@ -10,6 +10,8 @@ export default function Home() {
   const weekday = now
     .toLocaleDateString("en-US", { weekday: "short" })
     .toUpperCase();                // SUN
+
+  const todayNews = await getTodayNews();
 
   return (
     <div className="board">

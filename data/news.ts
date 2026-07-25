@@ -17,10 +17,19 @@ export type News = {
 import { internationalNews } from "./international";
 import { socialNews } from "./social";
 import { weatherNews } from "./weather";
+import { fetchInternationalNews, pickMostUrgent } from "@/lib/naverNews";
 
-// 홈용: 각 카테고리에서 "맨 앞 1개씩"만 뽑아 모음
-export const todayNews: News[] = [
-  socialNews[0],
-  internationalNews[0],
-  weatherNews[0],
-];
+// 홈용: 각 카테고리에서 대표 1건씩 모음
+// 국제 파트는 실시간 뉴스 중 "진행중" 표시가 붙은(=가장 긴급한) 기사를 우선 노출하고,
+// API 호출이 실패하면 예시 데이터의 첫 번째 기사로 대체함
+export async function getTodayNews(): Promise<News[]> {
+  let internationalPick = internationalNews[0];
+  try {
+    const liveInternational = await fetchInternationalNews(3);
+    internationalPick = pickMostUrgent(liveInternational);
+  } catch (err) {
+    console.error("[home] international live fetch failed, using fallback:", err);
+  }
+
+  return [socialNews[0], internationalPick, weatherNews[0]];
+}

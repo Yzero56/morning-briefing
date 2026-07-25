@@ -28,6 +28,19 @@ body {
 
 .board { max-width: 640px; margin: 0 auto; }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--paper-dim);
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+.back-link:hover { color: var(--paper); }
+
 header {
   display: flex;
   justify-content: space-between;

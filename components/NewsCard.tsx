@@ -3,8 +3,15 @@ import Link from "next/link";
 import { News } from "@/data/news";
 
 export default function NewsCard({ news, index }: { news: News; index: number }) {
+  const isExternal = /^https?:\/\//.test(news.link);
+
   return (
-    <Link href={news.link} className="item" data-cat={news.category}>
+    <Link
+      href={news.link}
+      className="item"
+      data-cat={news.category}
+      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
       <div className="idx">{String(index).padStart(2, "0")}</div>
       <div className="item-body">
         <div className="tag-row">
