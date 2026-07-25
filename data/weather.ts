@@ -1,7 +1,7 @@
 import { News } from "./news";
 
 // OpenWeatherMap API 설정
-const API_KEY = '0fd5cf76daabdab66f65482b68ff2896';
+const API_KEY = 'MY_API_KEY';
 const CITY = 'Busan';
 const CURRENT_API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric&lang=kr`;
 const FORECAST_API_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${CITY}&appid=${API_KEY}&units=metric&lang=kr`;
@@ -91,13 +91,9 @@ async function weatherDataToNews(): Promise<News[]> {
     const weatherKorean = weatherTranslation[weatherDesc] || weatherDesc;
     const detailDesc = data.weather[0].description;
 
-    const headline = `${data.name} 현재 날씨: ${weatherKorean}, ${Math.round(data.main.temp)}°C`;
+    const headline = `${data.name} | ${weatherKorean} | ${Math.round(data.main.temp)}°C`;
 
-    const body = `현재 온도: ${Math.round(data.main.temp)}°C
-체감 온도: ${Math.round(data.main.feels_like)}°C
-최저/최고: ${Math.round(data.main.temp_min)}°C / ${Math.round(data.main.temp_max)}°C
-습도: ${data.main.humidity}%
-상세: ${detailDesc}`;
+    const body = `체감 : ${Math.round(data.main.feels_like)}°C | 습도 : ${data.main.humidity}% | 바람 ${getWindDirection(data.wind.deg)} ${data.wind.speed}m/s`;
 
     return [
       {
