@@ -5,11 +5,11 @@ import { getTodayNews } from "@/data/news";
 export default async function Home() {
   const now = new Date();
   const dateTag = now
-    .toLocaleDateString("en-CA")   // 2026-07-19 형태
-    .replace(/-/g, ".");           // 2026.07.19
+    .toLocaleDateString("en-CA")   // 오늘 날짜
+    .replace(/-/g, ".");           // 오늘 날짜 
   const weekday = now
     .toLocaleDateString("en-US", { weekday: "short" })
-    .toUpperCase();                // SUN
+    .toUpperCase();                // SUN (대문자로)
 
   const todayNews = await getTodayNews();
 
