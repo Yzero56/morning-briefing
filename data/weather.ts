@@ -1,7 +1,7 @@
 import { News } from "./news";
 
 // OpenWeatherMap API 설정
-const API_KEY = 'MY_API_KEY';
+const API_KEY = process.env.WEATHER_API_KEY || '';
 const CITY = 'Busan';
 const CURRENT_API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric&lang=kr`;
 const FORECAST_API_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${CITY}&appid=${API_KEY}&units=metric&lang=kr`;
