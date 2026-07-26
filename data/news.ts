@@ -10,6 +10,7 @@ export type News = {
   source: string;
   live: boolean;      // 진행중 여부
   link: string;       // 클릭 시 이동할 주소
+  image?: string;     // 썸네일 이미지 URL (없을 수 있음)
 };
 
 

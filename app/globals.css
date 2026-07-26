@@ -90,7 +90,17 @@ h1 {
 .item[data-cat="weather"] .idx { color: var(--weather); opacity: 0.9; }
 .item[data-cat="sports"] .idx { color: var(--sports); opacity: 0.9; }
 
-.item-body { min-width: 0; }
+.item-body { min-width: 0; display: flex; gap: 14px; justify-content: space-between; }
+.item-text { min-width: 0; flex: 1; }
+
+.thumb {
+  width: 140px;
+  align-self: stretch;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--board-edge);
+}
 
 .tag-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 
@@ -135,4 +145,5 @@ footer {
   header { flex-direction: column; align-items: flex-start; gap: 10px; }
   .count { text-align: left; }
   .count b { font-size: 24px; }
+  .thumb { width: 88px; }
 }
