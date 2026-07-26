@@ -2,7 +2,18 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### 1. API 키 설정
+
+프로젝트 루트 폴더에 `.env` 파일을 생성하고 날씨 API 키를 설정하세요:
+
+```bash
+# .env 파일 생성
+WEATHER_API_KEY=여기에_당신의_API_키를_넣으세요
+```
+
+> 참고: `.env.example` 파일에서 형식을 확인할 수 있습니다. API 키는 [OpenWeatherMap](https://openweathermap.org/api)에서 무료로 받을 수 있습니다.
+
+### 2. 개발 서버 실행
 
 ```bash
 npm run dev
