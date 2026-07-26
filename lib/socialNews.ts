@@ -3,6 +3,7 @@
 // getSocialNews()와 API 라우트 모두 이 함수를 직접 호출한다.
 // (이전에는 getSocialNews()가 http://localhost:3000/api/news 로 자기 서버에 HTTP 요청을 보냈기 때문에
 //  Vercel 등 배포 환경에서 localhost 가 존재하지 않아 사회 뉴스가 뜨지 않았다.)
+import { unstable_cache } from "next/cache";
 import type { News } from "@/data/news";
 
 const priorityDomains = [
@@ -143,7 +144,7 @@ type NaverNewsResponse = {
 const clean = (text: string) => text.replace(/<[^>]*>/g, "");
 
 // 네이버 뉴스 검색으로 사회 대표 기사 1건을 가져와 News 타입으로 변환
-export async function fetchSocialNewsItem(): Promise<News> {
+async function fetchSocialNewsItemUncached(): Promise<News> {
   const clientId = process.env.NAVER_CLIENT_ID;
   const clientSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -163,7 +164,7 @@ export async function fetchSocialNewsItem(): Promise<News> {
           "X-Naver-Client-Id": clientId,
           "X-Naver-Client-Secret": clientSecret,
         },
-        cache: "no-store",
+        next: { revalidate: 60 }, // 국제 뉴스와 동일 패턴 (국제는 600)
       }
     )
   );
@@ -241,3 +242,12 @@ export async function fetchSocialNewsItem(): Promise<News> {
     link: item.originallink ?? item.link ?? "#",
   };
 }
+
+// 1분 캐시로 감싸서, 방문자가 아무리 많아도 네이버 조회는 분당 1회만 실행.
+// 사회 뉴스는 사고/재난 등 실시간성이 중요해 국제(10분)보다 짧은 60초로 설정.
+// 1회 호출당 4개 쿼리(정치/사회/경제/국제) = 일일 최대 1,440×4 = 5,760건 << Naver 한도 25,000건.
+export const fetchSocialNewsItem = unstable_cache(
+  fetchSocialNewsItemUncached,
+  ["social-news"],
+  { revalidate: 600 }
+);
